@@ -57,9 +57,50 @@ class _HomeScreenState extends State<HomeScreen> {
               style: theme.textTheme.bodyLarge,
             ),
             const SizedBox(height: 20),
+            //OPTIONAL: Add a dropdown for scan OPTIONS SPECIFIC TO NMAP WITH A LITTLE DESCRIPTION
+            Text(
+              'Select scan options (optional):',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<String>(
+              items: const [
+                DropdownMenuItem(value: 'default', child: Text('Default Scan')),
+                DropdownMenuItem(value: '-sS', child: Text('SYN Scan')),
+                DropdownMenuItem(value: '-sU', child: Text('UDP Scan')),
+                DropdownMenuItem(
+                  value: '-sV',
+                  child: Text('Service Version Detection'),
+                ),
+                DropdownMenuItem(value: '-O', child: Text('OS Detection')),
+                DropdownMenuItem(value: '-A', child: Text('Aggressive Scan')),
+                DropdownMenuItem(value: '-Pn', child: Text('No Ping Scan')),
+                DropdownMenuItem(value: '-p-', child: Text('Scan All Ports')),
+                DropdownMenuItem(
+                  value: '-p 1-65535',
+                  child: Text('Scan All Ports (1-65535)'),
+                ),
+              ],
+              onChanged: (value) {
+                // Handle scan option change if needed
+                
+              },
+              decoration: InputDecoration(
+                border: theme.inputDecorationTheme.border,
+                focusedBorder: theme.inputDecorationTheme.focusedBorder,
+              ),
+            ),
+            const SizedBox(height: 20),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+                textStyle: theme.textTheme.bodyLarge,
+              ),
               onPressed: _scanTarget,
-              child: Text('Scan', style: theme.textTheme.bodyLarge),
+              child: Text(
+                'Scan',
+                style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white),
+              ),
             ),
             const SizedBox(height: 20),
             Expanded(
