@@ -15,13 +15,37 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _controller = TextEditingController();
   String _result = '';
 
+  // Add this for multi-select options
+  final Map<String, String> _scanOptions = {
+    '-sS': 'SYN Scan',
+    '-sU': 'UDP Scan',
+    '-sV': 'Service Version Detection',
+    '-O': 'OS Detection',
+    '-A': 'Aggressive Scan',
+    '-Pn': 'No Ping Scan',
+    '-p-': 'Scan All Ports',
+    '-p 1-65535': 'Scan All Ports (1-65535)',
+  };
+  final Set<String> _selectedOptions = {};
+
+  bool _isScanning = false; // Add this line
+
   Future<void> _scanTarget() async {
     String target = _controller.text.trim();
     if (target.isEmpty) return;
-
-    setState(() => _result = 'Scanning...');
-    String output = await NmapService.runNmap(target);
-    setState(() => _result = output);
+    setState(() {
+      _isScanning = true;
+      _result = '';
+    });
+    String options = _selectedOptions.join(' ');
+    // Simulate scan delay (replace with your actual scan call)
+    // String output = await NmapService.runNmap(target, options: options);
+    await Future.delayed(const Duration(seconds: 3));// Simulate a scan delay
+    setState(() {
+      _isScanning = false;
+      _result = 'Scan complete!'; // Replace with: output
+      
+    });
   }
 
   @override
@@ -57,37 +81,34 @@ class _HomeScreenState extends State<HomeScreen> {
               style: theme.textTheme.bodyLarge,
             ),
             const SizedBox(height: 20),
-            //OPTIONAL: Add a dropdown for scan OPTIONS SPECIFIC TO NMAP WITH A LITTLE DESCRIPTION
             Text(
               'Select scan options (optional):',
-              style: theme.textTheme.bodyMedium,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 10),
-            DropdownButtonFormField<String>(
-              items: const [
-                DropdownMenuItem(value: 'default', child: Text('Default Scan')),
-                DropdownMenuItem(value: '-sS', child: Text('SYN Scan')),
-                DropdownMenuItem(value: '-sU', child: Text('UDP Scan')),
-                DropdownMenuItem(
-                  value: '-sV',
-                  child: Text('Service Version Detection'),
-                ),
-                DropdownMenuItem(value: '-O', child: Text('OS Detection')),
-                DropdownMenuItem(value: '-A', child: Text('Aggressive Scan')),
-                DropdownMenuItem(value: '-Pn', child: Text('No Ping Scan')),
-                DropdownMenuItem(value: '-p-', child: Text('Scan All Ports')),
-                DropdownMenuItem(
-                  value: '-p 1-65535',
-                  child: Text('Scan All Ports (1-65535)'),
-                ),
-              ],
-              onChanged: (value) {
-                // Handle scan option change if needed
-                
-              },
-              decoration: InputDecoration(
-                border: theme.inputDecorationTheme.border,
-                focusedBorder: theme.inputDecorationTheme.focusedBorder,
+            // Multi-select checkboxes
+            ..._scanOptions.entries.map(
+              (entry) => CheckboxListTile(
+                value: _selectedOptions.contains(entry.key),
+                title: Text(entry.value, style: theme.textTheme.bodyMedium),
+                onChanged:
+                    _isScanning
+                        ? null
+                        : (selected) {
+                          setState(() {
+                            if (selected == true) {
+                              _selectedOptions.add(entry.key);
+                            } else {
+                              _selectedOptions.remove(entry.key);
+                            }
+                          });
+                        },
+                controlAffinity: ListTileControlAffinity.leading,
+                activeColor: theme.colorScheme.primary,
+                dense: true,
+                contentPadding: EdgeInsets.zero,
               ),
             ),
             const SizedBox(height: 20),
@@ -96,13 +117,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 minimumSize: const Size(double.infinity, 50),
                 textStyle: theme.textTheme.bodyLarge,
               ),
-              onPressed: _scanTarget,
+              onPressed: _isScanning ? null : _scanTarget,
               child: Text(
                 'Scan',
                 style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white),
               ),
             ),
             const SizedBox(height: 20),
+            if (_isScanning)
+              const LinearProgressIndicator(), // <-- Horizontal progress bar
             Expanded(
               child: SingleChildScrollView(
                 child: Text(_result, style: theme.textTheme.bodyMedium),
