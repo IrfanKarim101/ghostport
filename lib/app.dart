@@ -22,7 +22,9 @@ class App extends StatelessWidget {
           initialRoute: '/',
           routes: {
             '/home': (context) => const HomeScreen(),
-            '/scan': (context) => const ScanScreen(),
+            '/scan':
+                (context) =>
+                    const ScanScreen(target: '', options: '', result: ''),
           },
           debugShowCheckedModeBanner: false,
         );

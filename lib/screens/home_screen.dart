@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:ghostport/models/scan_result.dart';
+import 'package:ghostport/screens/scan_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:ghostport/services/theme_services.dart';
 // ignore: library_prefixes
-import 'package:ghostport/services/preparation.dart' as NmapService;
+import 'package:ghostport/services/nmap_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -39,12 +41,26 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     String options = _selectedOptions.join(' ');
     // Simulate scan delay (replace with your actual scan call)
-    // String output = await NmapService.runNmap(target, options: options);
-    await Future.delayed(const Duration(seconds: 3));// Simulate a scan delay
+    NmapService nmapService = NmapService();
+    ScanResult output = await nmapService.runScan(
+      target: target,
+      options: options,
+    );
+    await Future.delayed(const Duration(seconds: 3)); // Simulate a scan delay
     setState(() {
       _isScanning = false;
-      _result = 'Scan complete!'; // Replace with: output
-      
+      _result = 'Scan completed successfully:\n${output.result}';
+
+      debugPrint('Scan Result: ${output.result}');
+      // Replace with: output
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder:
+      //         (context) =>
+      //             ScanScreen(target: target, options: options, result: _result),
+      //   ),
+      // );
     });
   }
 
@@ -70,8 +86,13 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
+            TextFormField(
               controller: _controller,
+              validator:
+                  (value) =>
+                      value!.isEmpty
+                          ? 'Please enter a target IP or domain'
+                          : null,
               decoration: InputDecoration(
                 labelText: 'Enter IP or domain',
                 labelStyle: theme.inputDecorationTheme.labelStyle,
